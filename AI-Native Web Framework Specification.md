@@ -5,12 +5,12 @@
 - **Claude (Anthropic)** (Co-Author, Technical Implementation & Specification)
 
 ## Vision
-**Browser-basierte visuelle Entwicklung mit spezialisierten AI-Agents**
-**Optimiert für maximale AI-Geschwindigkeit, Qualität und Kosteneffizienz**
+**Browser-based visual development with specialized AI agents**
+**Optimized for maximum AI speed, quality, and cost efficiency**
 
-Menschen benutzen Browser DevTools + Natural Language.
-Spezialisierte AIs implementieren mit AI-nativen Optimierungen.
-Eigene Datenbank, Protokolle und Infrastruktur für AIs optimiert.
+Humans use Browser DevTools + Natural Language.
+Specialized AIs implement with AI-native optimizations.
+Custom database, protocols, and infrastructure optimized for AIs.
 
 ---
 
@@ -19,16 +19,16 @@ Eigene Datenbank, Protokolle und Infrastruktur für AIs optimiert.
 ### 0.1 Philosophy: Everything Optimized for AI
 
 ```
-TRADITIONAL STACK (AI-feindlich):
+TRADITIONAL STACK (AI-unfriendly):
 ├─ SQL (verbose, human-readable)
 ├─ HTTP/JSON (overhead, text-based)
 ├─ Relational DB (joins, normalization)
 └─ REST API (stateless, repetitive)
 
-AIWS STACK (AI-nativ):
+AIWS STACK (AI-native):
 ├─ AIQ (AI Query Language - binary, compact)
 ├─ AIBP (AI Binary Protocol - 10x faster)
-├─ GraphMemDB (graph+vector DB, AI-optimiert)
+├─ GraphMemDB (graph+vector DB, AI-optimized)
 └─ StateStream (stateful, predictive)
 
 RESULT: 10x faster, 5x cheaper, 3x better quality

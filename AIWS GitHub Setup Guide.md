@@ -1,25 +1,25 @@
 # AIWS GitHub Setup Guide
 
-## 1. Lokales Repository erstellen
+## 1. Create Local Repository
 
-# Erstelle Projektordner
+# Create project folder
 mkdir aiws-platform
 cd aiws-platform
 
-# Initialisiere Git
+# Initialize Git
 git init
 
-# Erstelle README.md (siehe nächster Abschnitt)
+# Create README.md (see next section)
 
-## 2. Projektstruktur erstellen
+## 2. Create Project Structure
 
-# Erstelle Ordnerstruktur
+# Create folder structure
 mkdir -p docs
 mkdir -p specs
 mkdir -p examples
 mkdir -p prototypes
 
-# Erstelle .gitignore
+# Create .gitignore
 cat > .gitignore << 'EOF'
 # Dependencies
 node_modules/
@@ -57,7 +57,7 @@ temp/
 *.tmp
 EOF
 
-# Erstelle LICENSE
+# Create LICENSE
 cat > LICENSE << 'EOF'
 Copyright (c) 2025 Dennis Sven Mittmann
 
@@ -74,12 +74,12 @@ the copyright holder.
 For permission requests, contact: [Your contact information]
 EOF
 
-## 3. Dateien committen
+## 3. Commit Files
 
-# Füge alle Dateien hinzu
+# Add all files
 git add .
 
-# Erster Commit
+# Initial commit
 git commit -m "Initial commit: AIWS Platform Specification v1.0
 
 - Complete system specification
@@ -90,40 +90,40 @@ git commit -m "Initial commit: AIWS Platform Specification v1.0
 
 Co-authored-by: Dennis Sven Mittmann <your.email@example.com>"
 
-## 4. GitHub Repository erstellen
+## 4. Create GitHub Repository
 
 # Option A: Via GitHub Website
-# 1. Gehe zu https://github.com/new
+# 1. Go to https://github.com/new
 # 2. Repository Name: "aiws-platform"
 # 3. Description: "AIWS - AI Web Assembly System: Visual AI Development Platform"
-# 4. Wähle "Private" oder "Public"
-# 5. NICHT initialisieren mit README, .gitignore oder License (haben wir schon!)
-# 6. Klicke "Create repository"
+# 4. Choose "Private" or "Public"
+# 5. DO NOT initialize with README, .gitignore, or License (we already have them!)
+# 6. Click "Create repository"
 
-# Option B: Via GitHub CLI (wenn installiert)
+# Option B: Via GitHub CLI (if installed)
 gh repo create aiws-platform --private --source=. --remote=origin
 
-## 5. Remote Repository verbinden und pushen
+## 5. Connect Remote Repository and Push
 
-# Füge GitHub als Remote hinzu (ersetze USERNAME mit deinem GitHub Username)
+# Add GitHub as remote (replace USERNAME with your GitHub username)
 git remote add origin https://github.com/USERNAME/aiws-platform.git
 
-# Oder mit SSH (empfohlen wenn SSH-Keys eingerichtet):
+# Or with SSH (recommended if SSH keys are set up):
 # git remote add origin git@github.com:USERNAME/aiws-platform.git
 
-# Main Branch umbenennen (falls nötig)
+# Rename main branch (if necessary)
 git branch -M main
 
-# Push zum GitHub
+# Push to GitHub
 git push -u origin main
 
-## 6. Weitere Branches erstellen (optional)
+## 6. Create Additional Branches (optional)
 
-# Development Branch
+# Development branch
 git checkout -b develop
 git push -u origin develop
 
-# Feature Branches
+# Feature branches
 git checkout -b feature/graphmemdb
 git push -u origin feature/graphmemdb
 
@@ -133,10 +133,10 @@ git push -u origin feature/aiq-compiler
 git checkout -b feature/browser-extension
 git push -u origin feature/browser-extension
 
-# Zurück zum Main Branch
+# Back to main branch
 git checkout main
 
-## 7. GitHub Actions einrichten (optional)
+## 7. Set Up GitHub Actions (optional)
 
 mkdir -p .github/workflows
 
@@ -158,18 +158,18 @@ jobs:
         run: echo "Documentation build placeholder"
 EOF
 
-## 8. Projekt-Beschreibung auf GitHub hinzufügen
+## 8. Add Project Description on GitHub
 
-# Nach dem Push:
-# 1. Gehe zu https://github.com/USERNAME/aiws-platform
-# 2. Klicke "About" (Zahnrad-Symbol rechts)
-# 3. Füge hinzu:
+# After push:
+# 1. Go to https://github.com/USERNAME/aiws-platform
+# 2. Click "About" (gear icon on the right)
+# 3. Add:
 #    - Description: "AI-native web development platform with visual interface"
-#    - Website: [deine Website falls vorhanden]
+#    - Website: [your website if available]
 #    - Topics: ai, web-development, visual-programming, automation, 
 #              low-code, ai-agents, graphdb, developer-tools
 
-## 9. Weitere empfohlene Dateien
+## 9. Add More Recommended Files
 
 # CONTRIBUTING.md
 cat > CONTRIBUTING.md << 'EOF'
@@ -224,37 +224,37 @@ when an individual is representing the project or its community.
 For any concerns, please contact: [Your contact email]
 EOF
 
-## 10. Committen und pushen
+## 10. Commit and Push
 
 git add .
 git commit -m "Add project documentation and contribution guidelines"
 git push
 
-## 11. GitHub Repository Settings empfohlen
+## 11. GitHub Repository Settings Recommended
 
-# Nach dem Setup auf GitHub:
+# After setup on GitHub:
 # 
-# 1. Gehe zu Settings → General
+# 1. Go to Settings → General
 #    - Features: Enable Wikis, Issues, Discussions
 #    - Pull Requests: Enable "Allow squash merging"
 #
 # 2. Settings → Branches
-#    - Füge Branch Protection für "main" hinzu:
+#    - Add Branch Protection for "main":
 #      ✓ Require pull request reviews
 #      ✓ Require status checks to pass
 #
 # 3. Settings → Pages (optional)
-#    - Enable GitHub Pages für Dokumentation
+#    - Enable GitHub Pages for documentation
 #    - Source: Deploy from branch "main", folder "/docs"
 
-## 12. Clone zum Testen
+## 12. Clone for Testing
 
-# In einem anderen Verzeichnis:
+# In another directory:
 cd ~/test
 git clone https://github.com/USERNAME/aiws-platform.git
 cd aiws-platform
 
-# Prüfe ob alles da ist
+# Check if everything is there
 ls -la
 
 echo "✅ AIWS successfully backed up to GitHub!"

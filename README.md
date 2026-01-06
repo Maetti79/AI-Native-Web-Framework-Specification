@@ -10,13 +10,13 @@
 
 ## 🎯 Vision
 
-**Browser-basierte visuelle Entwicklung mit spezialisierten AI-Agents**
+**Browser-based visual development with specialized AI agents**
 
-AIWS revolutioniert Web-Entwicklung durch:
+AIWS revolutionizes web development through:
 - 🖱️ **Visual-First Interface** - Browser DevTools + Natural Language
 - 🤖 **Specialized AI Agents** - Design, Database, API, Product
 - ⚡ **AI-Native Infrastructure** - GraphMemDB, AIQ, AIBP
-- 🚀 **Production-Ready Code** - Von Konzept zu Deployment in Minuten
+- 🚀 **Production-Ready Code** - From concept to deployment in minutes
 
 ---
 
