@@ -1,0 +1,402 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>AIWS Prototype - Visual AI Development</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    body {
+      font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, sans-serif;
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      min-height: 100vh;
+      padding: 20px;
+    }
+
+    .container {
+      max-width: 1200px;
+      margin: 0 auto;
+    }
+
+    .header {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .header h1 {
+      color: #667eea;
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    .header p {
+      color: #666;
+      font-size: 1.1rem;
+    }
+
+    .demo-section {
+      background: white;
+      border-radius: 12px;
+      padding: 30px;
+      margin-bottom: 20px;
+      box-shadow: 0 10px 30px rgba(0,0,0,0.2);
+    }
+
+    .demo-section h2 {
+      color: #333;
+      margin-bottom: 20px;
+      font-size: 1.5rem;
+    }
+
+    .product-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 20px;
+      margin-top: 20px;
+    }
+
+    .product-card {
+      border: 1px solid #e5e7eb;
+      border-radius: 8px;
+      padding: 20px;
+      background: #f9fafb;
+      transition: transform 0.2s, box-shadow 0.2s;
+      cursor: pointer;
+    }
+
+    .product-card:hover {
+      transform: translateY(-2px);
+      box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    .product-card.selected {
+      border-color: #667eea;
+      background: #f0f4ff;
+    }
+
+    .product-title {
+      font-size: 1.2rem;
+      font-weight: 600;
+      color: #333;
+      margin-bottom: 10px;
+    }
+
+    .product-price {
+      font-size: 1.5rem;
+      color: #667eea;
+      font-weight: bold;
+      margin-bottom: 10px;
+    }
+
+    .product-category {
+      font-size: 0.9rem;
+      color: #666;
+      margin-bottom: 15px;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-size: 1rem;
+      transition: all 0.2s;
+    }
+
+    .btn-primary {
+      background: #667eea;
+      color: white;
+    }
+
+    .btn-primary:hover {
+      background: #5568d3;
+    }
+
+    #aiws-panel {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      width: 400px;
+      background: white;
+      border-radius: 12px;
+      box-shadow: 0 10px 40px rgba(0,0,0,0.3);
+      display: flex;
+      flex-direction: column;
+      max-height: 600px;
+      z-index: 10000;
+    }
+
+    .panel-header {
+      background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+      color: white;
+      padding: 20px;
+      border-radius: 12px 12px 0 0;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+
+    .panel-header h3 {
+      font-size: 1.2rem;
+    }
+
+    .agent-tabs {
+      display: flex;
+      gap: 10px;
+      margin-top: 10px;
+    }
+
+    .agent-tab {
+      padding: 5px 10px;
+      background: rgba(255,255,255,0.2);
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: background 0.2s;
+    }
+
+    .agent-tab:hover {
+      background: rgba(255,255,255,0.3);
+    }
+
+    .panel-content {
+      padding: 20px;
+      flex: 1;
+      overflow-y: auto;
+    }
+
+    .selected-element {
+      background: #f0f4ff;
+      padding: 15px;
+      border-radius: 6px;
+      margin-bottom: 15px;
+      border-left: 4px solid #667eea;
+    }
+
+    .selected-element h4 {
+      color: #667eea;
+      font-size: 0.9rem;
+      margin-bottom: 5px;
+    }
+
+    .chat-messages {
+      margin-bottom: 15px;
+      max-height: 300px;
+      overflow-y: auto;
+    }
+
+    .message {
+      padding: 10px;
+      margin-bottom: 10px;
+      border-radius: 6px;
+    }
+
+    .message-human {
+      background: #f0f4ff;
+      color: #333;
+      margin-left: 40px;
+    }
+
+    .message-ai {
+      background: #667eea;
+      color: white;
+      margin-right: 40px;
+    }
+
+    .quick-actions {
+      display: flex;
+      flex-wrap: wrap;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .quick-action {
+      padding: 6px 12px;
+      background: #f3f4f6;
+      border: none;
+      border-radius: 4px;
+      font-size: 0.85rem;
+      cursor: pointer;
+      transition: all 0.2s;
+    }
+
+    .quick-action:hover {
+      background: #667eea;
+      color: white;
+    }
+
+    .panel-input {
+      display: flex;
+      gap: 10px;
+      padding: 15px;
+      border-top: 1px solid #e5e7eb;
+    }
+
+    .panel-input input {
+      flex: 1;
+      padding: 10px;
+      border: 1px solid #d1d5db;
+      border-radius: 6px;
+      font-size: 1rem;
+    }
+
+    .panel-input button {
+      padding: 10px 20px;
+      background: #667eea;
+      color: white;
+      border: none;
+      border-radius: 6px;
+      cursor: pointer;
+      font-weight: 600;
+    }
+
+    .panel-input button:hover {
+      background: #5568d3;
+    }
+
+    .status-indicator {
+      width: 8px;
+      height: 8px;
+      border-radius: 50%;
+      background: #10b981;
+      display: inline-block;
+      margin-right: 5px;
+      animation: pulse 2s infinite;
+    }
+
+    @keyframes pulse {
+      0%, 100% { opacity: 1; }
+      50% { opacity: 0.5; }
+    }
+
+    .highlight-element {
+      outline: 2px solid #667eea !important;
+      outline-offset: 2px;
+      background: rgba(102, 126, 234, 0.1) !important;
+    }
+
+    .stats-grid {
+      display: grid;
+      grid-template-columns: repeat(3, 1fr);
+      gap: 15px;
+      margin-top: 20px;
+    }
+
+    .stat-card {
+      background: #f9fafb;
+      padding: 15px;
+      border-radius: 8px;
+      text-align: center;
+    }
+
+    .stat-value {
+      font-size: 2rem;
+      font-weight: bold;
+      color: #667eea;
+    }
+
+    .stat-label {
+      font-size: 0.9rem;
+      color: #666;
+      margin-top: 5px;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <div class="header">
+      <h1>🤖 AIWS Prototype</h1>
+      <p>AI-Native Web Development Platform - Visual Interface Demo</p>
+      <div class="stats-grid">
+        <div class="stat-card">
+          <div class="stat-value" id="node-count">0</div>
+          <div class="stat-label">DB Nodes</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="agent-count">4</div>
+          <div class="stat-label">Active Agents</div>
+        </div>
+        <div class="stat-card">
+          <div class="stat-value" id="command-count">0</div>
+          <div class="stat-label">Commands</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>Product Catalog</h2>
+      <p style="color: #666; margin-bottom: 10px;">
+        Click on any product, then use the AI panel to modify it!
+        Try: "Make this bigger", "Change color to blue", "Add a shadow"
+      </p>
+      <div class="product-grid" id="product-grid">
+        <!-- Products will be loaded here -->
+      </div>
+    </div>
+
+    <div class="demo-section">
+      <h2>User List</h2>
+      <div id="user-list">
+        <!-- Users will be loaded here -->
+      </div>
+    </div>
+  </div>
+
+  <!-- AIWS AI Panel -->
+  <div id="aiws-panel">
+    <div class="panel-header">
+      <div>
+        <h3><span class="status-indicator"></span>AIWS AI Assistant</h3>
+        <div class="agent-tabs">
+          <div class="agent-tab">🎨 Design</div>
+          <div class="agent-tab">💾 Database</div>
+          <div class="agent-tab">🔌 API</div>
+          <div class="agent-tab">📋 Product</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-content">
+      <div class="selected-element" id="selected-info">
+        <h4>No element selected</h4>
+        <p style="font-size: 0.85rem; color: #666;">Click any element to select it</p>
+      </div>
+
+      <div class="quick-actions">
+        <button class="quick-action" data-command="Make bigger">Make Bigger</button>
+        <button class="quick-action" data-command="Make smaller">Make Smaller</button>
+        <button class="quick-action" data-command="Center this">Center</button>
+        <button class="quick-action" data-command="Make blue">Blue</button>
+        <button class="quick-action" data-command="Make red">Red</button>
+        <button class="quick-action" data-command="Add shadow">Add Shadow</button>
+      </div>
+
+      <div class="chat-messages" id="chat-messages">
+        <div class="message message-ai">
+          👋 Hi! I'm your AI assistant. Select an element and tell me what you want to change!
+        </div>
+      </div>
+    </div>
+
+    <div class="panel-input">
+      <input
+        type="text"
+        id="aiws-input"
+        placeholder="What would you like to do?"
+        autocomplete="off"
+      />
+      <button id="aiws-send">Send</button>
+    </div>
+  </div>
+
+  <script type="module" src="/src/main.ts"></script>
+</body>
+</html>

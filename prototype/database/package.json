@@ -1,0 +1,20 @@
+{
+  "name": "@aiws/database",
+  "version": "0.1.0",
+  "description": "GraphMemDB - AI-Native Database for AIWS",
+  "main": "dist/index.js",
+  "types": "dist/index.d.ts",
+  "scripts": {
+    "build": "tsc",
+    "dev": "tsc --watch",
+    "test": "jest"
+  },
+  "dependencies": {
+    "@aiws/shared": "*"
+  },
+  "devDependencies": {
+    "@types/node": "^20.10.6",
+    "typescript": "^5.3.3",
+    "jest": "^29.7.0"
+  }
+}
