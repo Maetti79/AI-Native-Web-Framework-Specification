@@ -59,8 +59,9 @@ export class AIQCompiler {
       if (line.match(/^(FETCH|INSERT|UPDATE|DELETE|GRAPH_TRAVERSE|GRAPH_QUERY)\s+\w+/)) {
         const match = line.match(/^(\w+)\s+(\w+)/);
         if (match) {
-          operation = match[1] as any;
-          if (operation === 'GRAPH_QUERY') operation = 'GRAPH_TRAVERSE';
+          let op = match[1];
+          if (op === 'GRAPH_QUERY') op = 'GRAPH_TRAVERSE';
+          operation = op as any;
           target = match[2];
         }
         continue;

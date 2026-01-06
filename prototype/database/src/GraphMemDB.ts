@@ -237,22 +237,23 @@ export class GraphMemDB {
         if (typeof condition === 'object') {
           // Handle operators like { $gt: 5, $lt: 10 }
           for (const [op, value] of Object.entries(condition)) {
-            const nodeValue = node.properties[key];
+            const nodeValue = node.properties[key] as any;
+            const compareValue = value as any;
             switch (op) {
               case '$gt':
-                if (!(nodeValue > value)) return false;
+                if (!(nodeValue > compareValue)) return false;
                 break;
               case '$gte':
-                if (!(nodeValue >= value)) return false;
+                if (!(nodeValue >= compareValue)) return false;
                 break;
               case '$lt':
-                if (!(nodeValue < value)) return false;
+                if (!(nodeValue < compareValue)) return false;
                 break;
               case '$lte':
-                if (!(nodeValue <= value)) return false;
+                if (!(nodeValue <= compareValue)) return false;
                 break;
               case '$ne':
-                if (!(nodeValue !== value)) return false;
+                if (!(nodeValue !== compareValue)) return false;
                 break;
             }
           }
