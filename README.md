@@ -205,8 +205,7 @@ Result: 62x faster, ∞x cheaper
 ## 📫 Contact
 
 For inquiries about collaboration or implementation:
-- **Email:** [your.email@example.com]
-- **GitHub Issues:** [Report bugs or request features](https://github.com/USERNAME/aiws-platform/issues)
+- **Email:** [dennis@compucampus.de]
 
 ---
 
