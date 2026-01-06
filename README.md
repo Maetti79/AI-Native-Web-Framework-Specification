@@ -2,7 +2,7 @@
 
 **Visual AI Development Platform**
 
-[![License](https://img.shields.io/badge/License-Proprietary-red.svg)](LICENSE)
+[![License](https://img.shields.io/badge/License-MIT-green.svg)](LICENSE)
 [![Status](https://img.shields.io/badge/Status-Specification-blue.svg)]()
 [![Version](https://img.shields.io/badge/Version-1.0.0-green.svg)]()
 
@@ -215,9 +215,9 @@ For inquiries about collaboration or implementation:
 
 ## 📄 License
 
-Copyright © 2025 Dennis Sven Mittmann. All rights reserved.
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
 
-This software is proprietary. See [LICENSE](LICENSE) for details.
+Copyright © 2025 Dennis Sven Mittmann
 
 ---
 
