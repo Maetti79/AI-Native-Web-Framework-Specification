@@ -1,0 +1,26 @@
+{
+  "name": "aiws-prototype",
+  "version": "0.1.0",
+  "description": "AIWS Prototype - Visual AI Development Platform",
+  "private": true,
+  "workspaces": [
+    "backend",
+    "frontend",
+    "browser-extension",
+    "database",
+    "shared"
+  ],
+  "scripts": {
+    "install:all": "npm install && npm run install:workspaces",
+    "install:workspaces": "npm install --workspaces",
+    "dev": "concurrently \"npm run dev:backend\" \"npm run dev:frontend\"",
+    "dev:backend": "npm run dev --workspace=backend",
+    "dev:frontend": "npm run dev --workspace=frontend",
+    "build": "npm run build --workspaces",
+    "test": "npm test --workspaces"
+  },
+  "devDependencies": {
+    "concurrently": "^8.2.2",
+    "typescript": "^5.3.3"
+  }
+}
