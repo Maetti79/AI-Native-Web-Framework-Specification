@@ -2,6 +2,7 @@
   "name": "@aiws/backend",
   "version": "0.1.0",
   "description": "AIWS Backend Server with AI Agents",
+  "license": "MIT",
   "main": "dist/index.js",
   "scripts": {
     "build": "tsc",
