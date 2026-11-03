@@ -257,3 +257,7 @@ See [prototype/README.md](prototype/README.md) for detailed instructions!
 <p align="center">
   Made with ❤️ by Dennis Sven Mittmann & Claude
 </p>
+
+## AIWS 2.0 development preview
+
+The new graph-native Kernel & Studio is in [aiws-2.0](aiws-2.0/README.md). It is an experimental redesign; the specification and prototype above remain historical references.

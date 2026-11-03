@@ -1,0 +1,22 @@
+{
+  "name": "aiws-native-kernel",
+  "version": "0.1.0",
+  "type": "module",
+  "private": false,
+  "license": "MIT",
+  "description": "AI-native graph application kernel and interactive studio demo",
+  "scripts": {
+    "dev": "node server.mjs",
+    "start": "node server.mjs",
+    "test": "npm run build && node tests/kernel.test.mjs && node tests/runtime.test.mjs && node tests/studio.test.mjs",
+    "build": "tsc -p tsconfig.json",
+    "bench": "npm run build && node benchmarks/kernel.mjs"
+  },
+  "engines": {
+    "node": ">=18"
+  },
+  "devDependencies": {
+    "jsdom": "26.1.0",
+    "typescript": "5.9.3"
+  }
+}
