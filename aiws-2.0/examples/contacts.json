@@ -1,0 +1,274 @@
+{
+  "schemaVersion": 2,
+  "root": "app",
+  "nodes": [
+    {
+      "id": "app",
+      "type": "app",
+      "props": {
+        "title": "PEOPLE / CRM",
+        "subtitle": "Your relationships, beautifully organized"
+      },
+      "children": [
+        "overview",
+        "form",
+        "directory",
+        "contacts",
+        "draft-name",
+        "draft-company",
+        "draft-email",
+        "search-state"
+      ]
+    },
+    {
+      "id": "overview",
+      "type": "section",
+      "props": {
+        "title": "A little closer to your customers.",
+        "subtitle": "A small contact manager built entirely from graph data and actions.",
+        "layout": "stack"
+      },
+      "children": ["search"]
+    },
+    {
+      "id": "search",
+      "type": "input",
+      "props": {
+        "label": "Search your contacts",
+        "value": "",
+        "placeholder": "Search name, company or email…"
+      },
+      "bindings": {
+        "value": {
+          "node": "search-state",
+          "key": "value"
+        }
+      },
+      "events": {
+        "change": [
+          {
+            "kind": "input",
+            "target": "search-state",
+            "key": "value"
+          }
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "form",
+      "type": "section",
+      "props": {
+        "title": "Make a new connection",
+        "subtitle": "Add a contact. Your form, data and history stay in sync.",
+        "layout": "stack"
+      },
+      "children": ["name", "company", "email", "create"]
+    },
+    {
+      "id": "name",
+      "type": "input",
+      "props": {
+        "label": "Full name",
+        "value": "",
+        "placeholder": "e.g. Maya Chen"
+      },
+      "bindings": {
+        "value": {
+          "node": "draft-name",
+          "key": "value"
+        }
+      },
+      "events": {
+        "change": [
+          {
+            "kind": "input",
+            "target": "draft-name",
+            "key": "value"
+          }
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "company",
+      "type": "input",
+      "props": {
+        "label": "Company",
+        "value": "",
+        "placeholder": "e.g. Orbit Studio"
+      },
+      "bindings": {
+        "value": {
+          "node": "draft-company",
+          "key": "value"
+        }
+      },
+      "events": {
+        "change": [
+          {
+            "kind": "input",
+            "target": "draft-company",
+            "key": "value"
+          }
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "email",
+      "type": "input",
+      "props": {
+        "label": "Email address",
+        "value": "",
+        "placeholder": "maya@example.com"
+      },
+      "bindings": {
+        "value": {
+          "node": "draft-email",
+          "key": "value"
+        }
+      },
+      "events": {
+        "change": [
+          {
+            "kind": "input",
+            "target": "draft-email",
+            "key": "value"
+          }
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "create",
+      "type": "action",
+      "props": {
+        "text": "Add contact →"
+      },
+      "events": {
+        "click": [
+          {
+            "kind": "append",
+            "target": "contacts",
+            "key": "value",
+            "items": [
+              {
+                "source": {
+                  "node": "draft-name",
+                  "key": "value"
+                }
+              },
+              {
+                "source": {
+                  "node": "draft-company",
+                  "key": "value"
+                }
+              },
+              {
+                "source": {
+                  "node": "draft-email",
+                  "key": "value"
+                }
+              }
+            ]
+          },
+          {
+            "kind": "set",
+            "target": "draft-name",
+            "key": "value",
+            "value": ""
+          },
+          {
+            "kind": "set",
+            "target": "draft-company",
+            "key": "value",
+            "value": ""
+          },
+          {
+            "kind": "set",
+            "target": "draft-email",
+            "key": "value",
+            "value": ""
+          }
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "directory",
+      "type": "table",
+      "props": {
+        "title": "Your contact directory",
+        "rows": [],
+        "filter": ""
+      },
+      "bindings": {
+        "rows": {
+          "node": "contacts",
+          "key": "value"
+        },
+        "filter": {
+          "node": "search-state",
+          "key": "value"
+        }
+      },
+      "events": {
+        "remove": [
+          {
+            "kind": "removeAt",
+            "target": "contacts",
+            "key": "value",
+            "index": "event"
+          }
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "contacts",
+      "type": "state",
+      "props": {
+        "value": [
+          ["Name", "Company", "Email"],
+          ["Amelia Brooks", "Northstar Labs", "amelia@northstar.example"],
+          ["Noah Fischer", "Orbit Studio", "noah@orbit.example"],
+          ["Sofia Rossi", "Acme Design", "sofia@acme.example"]
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "draft-name",
+      "type": "state",
+      "props": {
+        "value": ""
+      },
+      "children": []
+    },
+    {
+      "id": "draft-company",
+      "type": "state",
+      "props": {
+        "value": ""
+      },
+      "children": []
+    },
+    {
+      "id": "draft-email",
+      "type": "state",
+      "props": {
+        "value": ""
+      },
+      "children": []
+    },
+    {
+      "id": "search-state",
+      "type": "state",
+      "props": {
+        "value": ""
+      },
+      "children": []
+    }
+  ]
+}

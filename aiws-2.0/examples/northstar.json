@@ -1,5 +1,5 @@
 {
-  "schemaVersion": 1,
+  "schemaVersion": 2,
   "root": "app",
   "nodes": [
     {
@@ -97,7 +97,7 @@
         "subtitle": "Growth across the last 12 months",
         "period": "12 months",
         "accent": "#7568f8",
-        "series": "[23,30,26,38,35,44,40,52,59,55,69,78]"
+        "series": [23, 30, 26, 38, 35, 44, 40, 52, 59, 55, 69, 78]
       },
       "children": []
     },
@@ -107,7 +107,10 @@
       "props": {
         "title": "Recent activity",
         "subtitle": "Latest events across your workspace",
-        "entries": "[[\"✓\",\"New subscription\",\"Pro plan activated\",\"2 min ago\",\"mint\"],[\"+\",\"Revenue milestone\",\"Reached €80k MRR\",\"1 hour ago\",\"purple\"]]"
+        "entries": [
+          ["✓", "New subscription", "Pro plan activated", "2 min ago", "mint"],
+          ["+", "Revenue milestone", "Reached €80k MRR", "1 hour ago", "purple"]
+        ]
       },
       "children": []
     },
@@ -132,7 +135,12 @@
       },
       "props": {
         "title": "Subscriptions",
-        "rows": "[[\"Workspace\",\"Plan\",\"Status\"],[\"Acme Studio\",\"Pro\",\"Active\"],[\"Orbit Labs\",\"Team\",\"Active\"],[\"Nova Design\",\"Starter\",\"Trial\"]]"
+        "rows": [
+          ["Workspace", "Plan", "Status"],
+          ["Acme Studio", "Pro", "Active"],
+          ["Orbit Labs", "Team", "Active"],
+          ["Nova Design", "Starter", "Trial"]
+        ]
       },
       "children": []
     },
@@ -166,7 +174,7 @@
       "id": "series-state",
       "type": "state",
       "props": {
-        "value": "[23,30,26,38,35,44,40,52,59,55,69,78]"
+        "value": [23, 30, 26, 38, 35, 44, 40, 52, 59, 55, 69, 78]
       },
       "children": []
     },
@@ -214,8 +222,8 @@
             "target": "series-state",
             "key": "value",
             "values": [
-              "[23,30,26,38,35,44,40,52,59,55,69,78]",
-              "[40,52,59,55,69,78]"
+              [23, 30, 26, 38, 35, 44, 40, 52, 59, 55, 69, 78],
+              [40, 52, 59, 55, 69, 78]
             ]
           }
         ]

@@ -1,3 +1,4 @@
+import { canonicalValue } from "./data.mjs";
 import { resolveNode, type Graph, type GraphNode } from "./kernel.mjs";
 import { link } from "./linker.mjs";
 export interface Artifact {
@@ -19,7 +20,7 @@ export function createCompiler() {
       for (const source of graph.nodes) {
         const node = resolveNode(graph, source);
         resolved.set(node.id, node);
-        const address = JSON.stringify([
+        const address = canonicalValue([
           node.type,
           Object.entries(node.props).sort(([a], [b]) => a.localeCompare(b)),
           Object.entries(node.events || {}).sort(([a], [b]) =>

@@ -1,6 +1,6 @@
 {
   "name": "aiws-native-kernel",
-  "version": "0.2.0",
+  "version": "0.3.0",
   "type": "module",
   "private": false,
   "license": "MIT",
@@ -8,10 +8,11 @@
   "scripts": {
     "dev": "node server.mjs",
     "start": "node server.mjs",
-    "test": "npm run build && node tests/kernel.test.mjs && node tests/runtime.test.mjs && node tests/behavior.test.mjs && node tests/studio.test.mjs",
+    "test": "npm run build && node tests/kernel.test.mjs && node tests/runtime.test.mjs && node tests/behavior.test.mjs && node tests/data.test.mjs && node tests/studio.test.mjs",
     "build": "tsc -p tsconfig.json",
     "bench": "npm run build && node benchmarks/kernel.mjs",
-    "test:e2e": "npm run build && node tests/browser.mjs"
+    "test:e2e": "npm run build && node tests/browser.mjs",
+    "build:site": "npm run build && node scripts/build-site.mjs"
   },
   "engines": {
     "node": ">=22"

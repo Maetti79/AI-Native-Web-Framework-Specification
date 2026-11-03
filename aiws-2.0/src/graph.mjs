@@ -4,7 +4,10 @@ export const seed = {
     {
       id: "app",
       type: "app",
-      props: { title: "NORTHSTAR", subtitle: "Operations overview" },
+      props: {
+        title: "NORTHSTAR",
+        subtitle: "Operations overview",
+      },
       children: [
         "metrics",
         "revenue",
@@ -79,15 +82,21 @@ export const seed = {
       id: "revenue",
       type: "chart",
       bindings: {
-        period: { node: "period-state", key: "value" },
-        series: { node: "series-state", key: "value" },
+        period: {
+          node: "period-state",
+          key: "value",
+        },
+        series: {
+          node: "series-state",
+          key: "value",
+        },
       },
       props: {
         title: "Revenue analytics",
         subtitle: "Growth across the last 12 months",
         period: "12 months",
         accent: "#7568f8",
-        series: "[23,30,26,38,35,44,40,52,59,55,69,78]",
+        series: [23, 30, 26, 38, 35, 44, 40, 52, 59, 55, 69, 78],
       },
       children: [],
     },
@@ -97,7 +106,7 @@ export const seed = {
       props: {
         title: "Recent activity",
         subtitle: "Latest events across your workspace",
-        entries: JSON.stringify([
+        entries: [
           ["✓", "New subscription", "Pro plan activated", "2 min ago", "mint"],
           [
             "+",
@@ -106,7 +115,7 @@ export const seed = {
             "1 hour ago",
             "purple",
           ],
-        ]),
+        ],
       },
       children: [],
     },
@@ -123,15 +132,20 @@ export const seed = {
     {
       id: "subscriptions",
       type: "table",
-      bindings: { filter: { node: "search-state", key: "value" } },
+      bindings: {
+        filter: {
+          node: "search-state",
+          key: "value",
+        },
+      },
       props: {
         title: "Subscriptions",
-        rows: JSON.stringify([
+        rows: [
           ["Workspace", "Plan", "Status"],
           ["Acme Studio", "Pro", "Active"],
           ["Orbit Labs", "Team", "Active"],
           ["Nova Design", "Starter", "Trial"],
-        ]),
+        ],
       },
       children: [],
     },
@@ -145,17 +159,28 @@ export const seed = {
       },
       children: ["search", "period-action"],
     },
-    { id: "search-state", type: "state", props: { value: "" }, children: [] },
+    {
+      id: "search-state",
+      type: "state",
+      props: {
+        value: "",
+      },
+      children: [],
+    },
     {
       id: "period-state",
       type: "state",
-      props: { value: "12 months" },
+      props: {
+        value: "12 months",
+      },
       children: [],
     },
     {
       id: "series-state",
       type: "state",
-      props: { value: "[23,30,26,38,35,44,40,52,59,55,69,78]" },
+      props: {
+        value: [23, 30, 26, 38, 35, 44, 40, 52, 59, 55, 69, 78],
+      },
       children: [],
     },
     {
@@ -166,16 +191,29 @@ export const seed = {
         placeholder: "Search subscriptions…",
         value: "",
       },
-      bindings: { value: { node: "search-state", key: "value" } },
+      bindings: {
+        value: {
+          node: "search-state",
+          key: "value",
+        },
+      },
       events: {
-        change: [{ kind: "input", target: "search-state", key: "value" }],
+        change: [
+          {
+            kind: "input",
+            target: "search-state",
+            key: "value",
+          },
+        ],
       },
       children: [],
     },
     {
       id: "period-action",
       type: "action",
-      props: { text: "Switch reporting period" },
+      props: {
+        text: "Switch reporting period",
+      },
       events: {
         click: [
           {
@@ -189,8 +227,8 @@ export const seed = {
             target: "series-state",
             key: "value",
             values: [
-              "[23,30,26,38,35,44,40,52,59,55,69,78]",
-              "[40,52,59,55,69,78]",
+              [23, 30, 26, 38, 35, 44, 40, 52, 59, 55, 69, 78],
+              [40, 52, 59, 55, 69, 78],
             ],
           },
         ],
@@ -231,4 +269,5 @@ export const seed = {
       children: [],
     },
   ],
+  schemaVersion: 2,
 };

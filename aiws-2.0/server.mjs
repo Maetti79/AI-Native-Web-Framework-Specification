@@ -7,8 +7,9 @@ const types = {
   ".html": "text/html; charset=utf-8",
   ".css": "text/css; charset=utf-8",
   ".mjs": "text/javascript; charset=utf-8",
+  ".json": "application/json; charset=utf-8",
 };
-export async function serve(req, res) {
+export async function serve(req, res, siteRoot = root) {
   const headers = {
     "X-Content-Type-Options": "nosniff",
     "Cache-Control": "no-store",
@@ -28,13 +29,13 @@ export async function serve(req, res) {
         url.pathname === "/" ? "/index.html" : url.pathname,
       );
     if (
-      !/^\/(index\.html|styles\.css|(?:src|dist)\/[a-z][a-z0-9-]*\.mjs)$/.test(
+      !/^\/(index\.html|styles\.css|examples\/(?:northstar|counter|contacts)\.json|(?:src|dist)\/[a-z][a-z0-9-]*\.mjs)$/.test(
         name,
       )
     )
       return reply(404, "Not found");
-    const path = await realpath(resolve(root, "." + name)),
-      resolvedRoot = await realpath(root);
+    const path = await realpath(resolve(siteRoot, "." + name)),
+      resolvedRoot = await realpath(siteRoot);
     if (!path.startsWith(resolvedRoot + sep)) return reply(403, "Forbidden");
     if (!(await stat(path)).isFile()) return reply(404, "Not found");
     reply(200, await readFile(path), { "Content-Type": types[extname(path)] });
@@ -42,8 +43,8 @@ export async function serve(req, res) {
     return reply(404, "Not found");
   }
 }
-export const createStudioServer = () =>
-  createServer((req, res) => void serve(req, res));
+export const createStudioServer = (options = {}) =>
+  createServer((req, res) => void serve(req, res, options.root || root));
 if (
   process.argv[1] &&
   resolve(process.argv[1]) === fileURLToPath(import.meta.url)

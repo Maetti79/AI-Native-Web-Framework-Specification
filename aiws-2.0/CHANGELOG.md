@@ -1,5 +1,15 @@
 # Changelog
 
+## 0.3.0 — 2026-11-03
+
+- Schema 2: native arrays, nested records and null state with bounded JSON validation.
+- Immutable, version-preserving migration of legacy dataset strings, bindings and actions.
+- Native data workspace and structured state type/record editing.
+- Atomic row append/form clearing, filtered row removal, required-field validation and undo/redo.
+- People / CRM example with desktop/mobile example selection and dynamic workspace labels.
+- Recursive canonical addresses avoid rebuilding for record key reordering.
+- 44 unit/integration tests plus desktop/mobile/offline browser workflows.
+
 ## 0.2.0 — 2026-11-03
 
 - Graph-defined scalar state, bindings and deterministic event dispatch with consumer validation.

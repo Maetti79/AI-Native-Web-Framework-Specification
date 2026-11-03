@@ -11,8 +11,9 @@ export async function exportApplication(
   },
 ) {
   validateGraph(graph);
-  const [kernel, linker, compiler, runtime, styles] = await Promise.all(
+  const [data, kernel, linker, compiler, runtime, styles] = await Promise.all(
     [
+      "dist/data.mjs",
       "dist/kernel.mjs",
       "dist/linker.mjs",
       "dist/compiler.mjs",
@@ -27,10 +28,12 @@ export async function exportApplication(
     return source;
   };
   const imports = {
-    "@aiws/kernel": dataURL(kernel),
+    "@aiws/data": dataURL(data),
+    "@aiws/kernel": dataURL(remap(kernel, { "./data.mjs": "@aiws/data" })),
     "@aiws/linker": dataURL(remap(linker, { "./kernel.mjs": "@aiws/kernel" })),
     "@aiws/compiler": dataURL(
       remap(compiler, {
+        "./data.mjs": "@aiws/data",
         "./kernel.mjs": "@aiws/kernel",
         "./linker.mjs": "@aiws/linker",
       }),

@@ -14,14 +14,18 @@
           <div class="brand-mark">◈</div>
           <div>
             <strong>AIWS<span class="brand-dot">.</span></strong
-            ><small>STUDIO / 0.2</small>
+            ><small>STUDIO / 0.3</small>
           </div>
         </div>
         <div class="workspace-select">
           <span class="workspace-avatar">N</span
           ><span
-            ><strong>Northstar Studio</strong
-            ><small>Free workspace</small></span
+            ><select id="example-select" aria-label="Example application">
+              <option value="">Imported application</option>
+              <option value="northstar">Northstar dashboard</option>
+              <option value="counter">Counter lab</option>
+              <option value="contacts">People / CRM</option></select
+            ><small>Graph examples</small></span
           ><span class="chevron">⌄</span>
         </div>
         <div class="nav-caption">WORKSPACE</div>
@@ -65,12 +69,22 @@
       <main class="main">
         <header class="topbar">
           <div class="crumbs">
-            Workspace <span>/</span> Northstar <span>/</span>
+            Workspace <span>/</span> <b id="application-name">Northstar</b>
+            <span>/</span>
             <strong>Overview</strong>
           </div>
           <div class="topbar-actions">
             <span class="status-dot"></span
             ><span class="online" id="save-state">Ready locally</span
+            ><select
+              id="example-picker"
+              class="example-picker"
+              aria-label="Load example"
+            >
+              <option value="">Examples</option>
+              <option value="northstar">Northstar dashboard</option>
+              <option value="counter">Counter lab</option>
+              <option value="contacts">People / CRM</option></select
             ><button id="reset" class="icon-button" title="Reset demo">↻</button
             ><label class="export-button import-label" for="import-file"
               >Import graph</label
@@ -98,7 +112,9 @@
               </h1>
               <p>An application you can inspect, change, and make your own.</p>
             </div>
-            <span class="date-chip">◷ &nbsp; NORTHSTAR / LIVE DEMO</span>
+            <span class="date-chip" id="application-badge"
+              >NORTHSTAR / LIVE DEMO</span
+            >
           </div>
           <div class="preview-banner">
             <div class="preview-icon">✦</div>
@@ -113,7 +129,7 @@
           </div>
           <div id="app-preview" aria-label="AIWS application preview"></div>
           <footer class="main-footer">
-            <span>AIWS ENGINE v0.2.0</span
+            <span>AIWS ENGINE v0.3.0</span
             ><span
               >TYPED GRAPH <b>·</b> GRAPH NATIVE <b>·</b> INCREMENTAL
               RUNTIME</span
@@ -217,6 +233,25 @@
             placeholder='[{"op":"set","id":"mrr","key":"label","value":"Revenue"}]'
           ></textarea
           ><button id="apply-patch">Validate & apply patch</button>
+        </details>
+        <details class="dev-panel" id="data-panel">
+          <summary>Data workspace</summary>
+          <p id="data-source"></p>
+          <div id="state-type-controls" class="component-toolbar" hidden>
+            <label for="data-type">State value type</label
+            ><select id="data-type">
+              <option value="string">Text</option>
+              <option value="number">Number</option>
+              <option value="boolean">Boolean</option>
+              <option value="null">Null</option>
+              <option value="array">List</option>
+              <option value="object">Record</option></select
+            ><button id="apply-data-type">
+              Replace state with empty value
+            </button>
+          </div>
+          <div id="data-grid" class="data-grid"></div>
+          <button id="add-data-row" type="button">Add data row</button>
         </details>
         <div class="inspector-spacer"></div>
         <div class="command-box">

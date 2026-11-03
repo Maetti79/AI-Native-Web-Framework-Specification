@@ -168,16 +168,16 @@ export function compileNode(n) {
           top,
           drawChart(
             /^#[0-9a-f]{6}$/i.test(p.accent) ? p.accent : "#8270f9",
-            JSON.parse(p.series || "[0,0]"),
+            p.series || [0, 0],
             n.id,
           ),
         );
         const months = el("div", "month-labels");
-        (JSON.parse(p.series || "[0,0]").length <= 12
+        ((p.series || [0, 0]).length <= 12
           ? "JAN FEB MAR APR MAY JUN JUL AUG SEP OCT NOV DEC"
               .split(" ")
-              .slice(-JSON.parse(p.series || "[0,0]").length)
-          : JSON.parse(p.series).map((_, i) => String(i + 1))
+              .slice(-(p.series || [0, 0]).length)
+          : p.series.map((_, i) => String(i + 1))
         ).forEach((m) => months.append(el("span", "", m)));
         root.append(months);
       }
@@ -189,7 +189,7 @@ export function compileNode(n) {
           el("h3", "card-title", p.title || "Recent activity"),
           el("p", "card-subtitle", p.subtitle || ""),
         );
-        const entries = JSON.parse(p.entries || "[]");
+        const entries = p.entries || [];
         for (const [ico, title, desc, time, tone] of entries) {
           const line = el("div", "activity-line"),
             bubble = el("span", `activity-bubble ${tone}`, ico),
@@ -205,7 +205,7 @@ export function compileNode(n) {
       root.append(el("h3", "card-title", p.title));
       {
         const table = el("table", "data-table");
-        for (const [i, row] of JSON.parse(p.rows || "[]").entries()) {
+        for (const [i, row] of (p.rows || []).entries()) {
           if (
             i > 0 &&
             p.filter &&
@@ -214,7 +214,19 @@ export function compileNode(n) {
             continue;
           const tr = el("tr");
           for (const value of row)
-            tr.append(el(i === 0 ? "th" : "td", "", value));
+            tr.append(el(i === 0 ? "th" : "td", "", value ?? "—"));
+          if (n.events?.remove) {
+            const cell = el(i === 0 ? "th" : "td");
+            if (i === 0) cell.textContent = "Actions";
+            else {
+              const remove = el("button", "row-remove", "Remove");
+              remove.type = "button";
+              remove.dataset.removeIndex = String(i);
+              remove.setAttribute("aria-label", `Remove ${row[0]}`);
+              cell.append(remove);
+            }
+            tr.append(cell);
+          }
           table.append(tr);
         }
         root.append(table);
@@ -338,6 +350,12 @@ export function createRuntime(mount) {
       if (node && mount.contains(node)) {
         event.stopPropagation();
         const id = node.dataset.aiwsId;
+        if (event.target.closest("[data-remove-index]")) {
+          const remove = event.target.closest("[data-remove-index]");
+          if (onAction)
+            onAction(id, "remove", Number(remove.dataset.removeIndex));
+          return;
+        }
         onSelect(id);
         if (map.get(id).events?.click && onAction) onAction(id, "click");
       }

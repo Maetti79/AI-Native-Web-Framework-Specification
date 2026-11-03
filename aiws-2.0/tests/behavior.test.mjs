@@ -140,7 +140,7 @@ test("numeric increment and toggle execute sequentially within one atomic action
 });
 test("unsupported schemas and recursive state bindings are rejected", () => {
   assert.throws(() =>
-    deserialize('{"schemaVersion":2,"root":"app","nodes":[]}'),
+    deserialize('{"schemaVersion":99,"root":"app","nodes":[]}'),
   );
   const graph = structuredClone(seed);
   node(graph, "search-state").bindings = {

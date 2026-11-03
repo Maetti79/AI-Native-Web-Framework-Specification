@@ -1463,3 +1463,88 @@ textarea:focus-visible,
 .compiled-app button[data-aiws-id] {
   cursor: pointer;
 }
+.data-grid {
+  max-height: 290px;
+  overflow: auto;
+  margin-bottom: 10px;
+}
+.data-editor-row {
+  display: flex;
+  gap: 5px;
+  align-items: center;
+  margin-bottom: 5px;
+}
+.data-editor-row input {
+  min-width: 65px;
+  width: 0;
+  flex: 1;
+  border: 1px solid #e0e2ed;
+  border-radius: 6px;
+  padding: 8px;
+  font-size: 11px;
+  color: #4d5670;
+}
+.data-editor-row button {
+  flex-shrink: 0;
+}
+.row-remove {
+  border: 1px solid #f0d9de;
+  background: #fff5f6;
+  border-radius: 6px;
+  padding: 7px 10px;
+  color: #b3415a;
+  font-size: 11px;
+  cursor: pointer;
+}
+.data-table th:last-child:has(+ td) {
+  text-align: right;
+}
+.data-table caption {
+  text-align: left;
+}
+.data-grid:empty {
+  display: none;
+}
+#example-select {
+  max-width: 145px;
+  min-width: 0;
+  width: 100%;
+  background: #191d33;
+  border: 0;
+  color: #f3f3fb;
+  font-size: 11px;
+  font-weight: 650;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.workspace-select > span:nth-child(2) {
+  min-width: 0;
+}
+#state-type-controls[hidden] {
+  display: none;
+}
+#state-type-controls {
+  margin-bottom: 14px;
+}
+.example-picker {
+  display: none;
+}
+@media (max-width: 980px) {
+  .example-picker {
+    display: block;
+    max-width: 150px;
+    border: 1px solid #dfe2ef;
+    border-radius: 9px;
+    background: white;
+    color: #4f5570;
+    font-size: 11px;
+    padding: 9px;
+    min-height: 44px;
+  }
+}
+@media (max-width: 600px) {
+  .example-picker {
+    max-width: 120px;
+    font-size: 10px;
+  }
+}

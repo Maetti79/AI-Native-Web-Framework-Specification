@@ -1,4 +1,12 @@
-export type Scalar = string | number | boolean;
+import {
+  assertValue,
+  canonicalValue,
+  isScalar,
+  valueKind,
+  type Scalar,
+  type Value,
+} from "./data.mjs";
+export type { Scalar, Value } from "./data.mjs";
 export type NodeType =
   | "app"
   | "section"
@@ -17,32 +25,44 @@ export interface Binding {
   key: string;
 }
 export type Action =
-  | { kind: "set"; target: string; key: string; value: Scalar }
+  | { kind: "set"; target: string; key: string; value: Value }
   | { kind: "increment"; target: string; key: string; amount: number }
   | { kind: "toggle"; target: string; key: string }
-  | { kind: "cycle"; target: string; key: string; values: Scalar[] }
-  | { kind: "input"; target: string; key: string };
+  | { kind: "cycle"; target: string; key: string; values: Value[] }
+  | { kind: "input"; target: string; key: string }
+  | {
+      kind: "append";
+      target: string;
+      key: string;
+      items: (Scalar | { source: Binding })[];
+    }
+  | { kind: "removeAt"; target: string; key: string; index: number | "event" };
 export interface GraphNode {
   bindings?: Record<string, Binding>;
-  events?: Partial<Record<"click" | "change", Action[]>>;
+  events?: Partial<Record<"click" | "change" | "remove", Action[]>>;
   id: string;
   type: NodeType;
-  props: Record<string, Scalar>;
+  props: Record<string, Value>;
   children: string[];
   revision?: number;
 }
 export interface Graph {
-  schemaVersion?: 1;
+  schemaVersion?: 1 | 2;
   version?: number;
   root: string;
   nodes: GraphNode[];
 }
 export type Operation =
-  | { op: "set"; id: string; key: string; value: Scalar }
+  | { op: "set"; id: string; key: string; value: Value }
   | { op: "add"; parent: string; node: GraphNode }
   | { op: "remove"; id: string }
   | { op: "bind"; id: string; key: string; source: Binding | null }
-  | { op: "event"; id: string; event: "click" | "change"; actions: Action[] }
+  | {
+      op: "event";
+      id: string;
+      event: "click" | "change" | "remove";
+      actions: Action[];
+    }
   | { op: "move"; id: string; parent: string; index: number };
 export interface Change {
   version: number;
@@ -93,10 +113,6 @@ const fields: Record<NodeType, string[]> = {
   badge: ["label", "detail", "progress", "tone"],
 };
 for (const type of TYPES) if (type !== "state") fields[type].push("visible");
-const isScalar = (value: unknown): value is Scalar =>
-  !(typeof value === "string" && value.length > 12000) &&
-  ["string", "number", "boolean"].includes(typeof value) &&
-  !(typeof value === "number" && !Number.isFinite(value));
 function validatePropertyNode(node: GraphNode) {
   const root: GraphNode = {
     id: "validation-root",
@@ -122,7 +138,7 @@ export function validateGraph(graph: Graph): true {
     !safeId(graph.root) ||
     !Array.isArray(graph.nodes) ||
     graph.nodes.length > 5000 ||
-    (graph.schemaVersion !== undefined && graph.schemaVersion !== 1)
+    (graph.schemaVersion !== undefined && graph.schemaVersion !== 2)
   )
     throw new AIWSError("GRAPH", "Invalid graph schema");
   const map = new Map<string, GraphNode>();
@@ -133,65 +149,77 @@ export function validateGraph(graph: Graph): true {
     if (!n.props || typeof n.props !== "object" || Array.isArray(n.props))
       throw new AIWSError("PROPS", "Invalid properties");
     for (const [key, v] of Object.entries(n.props)) {
-      if (
-        !fields[n.type].includes(key) ||
-        !["string", "number", "boolean"].includes(typeof v) ||
-        (typeof v === "number" && !Number.isFinite(v)) ||
-        String(v).length >
-          (n.type === "state" || ["series", "entries", "rows"].includes(key)
-            ? 12000
-            : 300)
-      )
-        throw new AIWSError("PROPS", `Invalid ${n.type}.${key}`);
-      if (key === "progress" && (typeof v !== "number" || v < 0 || v > 100))
-        throw new AIWSError("PROPS", "Progress must be 0–100");
-      if (
-        ["accent", "background"].includes(key) &&
-        !(typeof v === "string" && /^#[0-9a-f]{6}$/i.test(v))
-      )
-        throw new AIWSError("PROPS", "Expected hex color");
+      if (!fields[n.type].includes(key))
+        throw new AIWSError("PROPS", `Unknown ${n.type}.${key}`);
+      try {
+        assertValue(v);
+      } catch (error) {
+        throw new AIWSError("DATA", (error as Error).message);
+      }
+      if (n.type === "state") continue;
       if (["series", "entries", "rows"].includes(key)) {
-        let data;
-        try {
-          data = JSON.parse(String(v));
-        } catch {
-          throw new AIWSError("DATA", "Invalid JSON data");
-        }
-        if (!Array.isArray(data) || data.length > 50)
-          throw new AIWSError("DATA", "Expected bounded array");
+        if (!Array.isArray(v))
+          throw new AIWSError("DATA", `${key} requires a native array`);
         if (
           key === "series" &&
-          (data.length < 2 ||
-            !data.every(
-              (x: unknown) =>
-                typeof x === "number" &&
-                Number.isFinite(x) &&
-                x >= 0 &&
-                x <= 100,
-            ))
+          (v.length < 2 ||
+            v.length > 50 ||
+            !v.every((x) => typeof x === "number" && x >= 0 && x <= 100))
         )
-          throw new AIWSError("DATA", "Invalid chart series");
+          throw new AIWSError(
+            "DATA",
+            "Series requires 2–50 numbers from 0 to 100",
+          );
         if (
-          key !== "series" &&
-          !data.every(
-            (row: unknown) =>
+          key === "entries" &&
+          !v.every(
+            (row) =>
               Array.isArray(row) &&
-              row.length <= 5 &&
+              row.length === 5 &&
               row.every((x) => typeof x === "string"),
           )
         )
-          throw new AIWSError("DATA", "Expected text rows");
+          throw new AIWSError(
+            "DATA",
+            "Activity entries require five text cells",
+          );
+        if (key === "rows" && v.length) {
+          const header = v[0];
+          if (
+            !Array.isArray(header) ||
+            !header.length ||
+            header.length > 12 ||
+            !header.every((x) => typeof x === "string") ||
+            !v.every(
+              (row) =>
+                Array.isArray(row) &&
+                row.length === header.length &&
+                row.every((x) => x === null || isScalar(x)),
+            )
+          )
+            throw new AIWSError(
+              "DATA",
+              "Table requires a text header and matching scalar rows",
+            );
+        }
+        continue;
       }
-      if (key === "visible" && typeof v !== "boolean")
-        throw new AIWSError("PROPS", "Visibility must be boolean");
-      if (
-        n.type !== "state" &&
-        key !== "progress" &&
-        key !== "visible" &&
-        !(n.type === "metric" && key === "value" && typeof v === "number") &&
-        typeof v !== "string"
-      )
-        throw new AIWSError("PROPS", "Expected text");
+      if (key === "progress") {
+        if (typeof v !== "number" || v < 0 || v > 100)
+          throw new AIWSError("PROPS", "Progress must be 0–100");
+        continue;
+      }
+      if (key === "visible") {
+        if (typeof v !== "boolean")
+          throw new AIWSError("PROPS", "Visibility must be boolean");
+        continue;
+      }
+      if (n.type === "metric" && key === "value" && typeof v === "number")
+        continue;
+      if (typeof v !== "string" || v.length > 300)
+        throw new AIWSError("PROPS", `Expected bounded text for ${key}`);
+      if (["accent", "background"].includes(key) && !/^#[0-9a-f]{6}$/i.test(v))
+        throw new AIWSError("PROPS", "Expected hex color");
     }
     if (n.type === "state" && !Object.hasOwn(n.props, "value"))
       throw new AIWSError("STATE", "State requires a value");
@@ -253,7 +281,7 @@ export function validateGraph(graph: Graph): true {
       throw new AIWSError("EVENT", "Invalid event map");
     for (const [event, actions] of Object.entries(n.events || {})) {
       if (
-        !["click", "change"].includes(event) ||
+        !["click", "change", "remove"].includes(event) ||
         !Array.isArray(actions) ||
         !actions.length ||
         actions.length > 40
@@ -261,7 +289,8 @@ export function validateGraph(graph: Graph): true {
         throw new AIWSError("EVENT", "Invalid event");
       if (
         (event === "click" && n.type !== "action") ||
-        (event === "change" && n.type !== "input")
+        (event === "change" && n.type !== "input") ||
+        (event === "remove" && n.type !== "table")
       )
         throw new AIWSError("EVENT", "Unsupported event on component");
       for (const a of actions) {
@@ -269,6 +298,12 @@ export function validateGraph(graph: Graph): true {
         if (!target || target.type !== "state" || a.key !== "value")
           throw new AIWSError("EVENT", "Actions target state values");
         const value = target.props.value;
+        try {
+          const actionData: unknown = a;
+          assertValue(actionData);
+        } catch (error) {
+          throw new AIWSError("EVENT", (error as Error).message);
+        }
         if (a.kind === "increment") {
           if (
             typeof value !== "number" ||
@@ -280,21 +315,53 @@ export function validateGraph(graph: Graph): true {
           if (typeof value !== "boolean")
             throw new AIWSError("EVENT", "Toggle requires a boolean");
         } else if (a.kind === "set") {
-          if (typeof a.value !== typeof value || !isScalar(a.value))
-            throw new AIWSError("EVENT", "Set requires a compatible scalar");
+          if (valueKind(a.value) !== valueKind(value))
+            throw new AIWSError("EVENT", "Set requires a compatible value");
         } else if (a.kind === "cycle") {
           if (
             !Array.isArray(a.values) ||
             a.values.length < 2 ||
             a.values.length > 20 ||
-            !a.values.every(
-              (v: unknown) => isScalar(v) && typeof v === typeof value,
-            )
+            !a.values.every((v: Value) => valueKind(v) === valueKind(value))
           )
             throw new AIWSError("EVENT", "Cycle values must match state");
         } else if (a.kind === "input") {
           if (event !== "change" || typeof value !== "string")
             throw new AIWSError("EVENT", "Input requires text state");
+        } else if (a.kind === "append") {
+          if (
+            !Array.isArray(value) ||
+            !Array.isArray(a.items) ||
+            !a.items.length ||
+            a.items.length > 12
+          )
+            throw new AIWSError(
+              "EVENT",
+              "Append requires a list and row items",
+            );
+          for (const item of a.items)
+            if (!isScalar(item)) {
+              const source =
+                item && typeof item === "object" && "source" in item
+                  ? item.source
+                  : undefined;
+              const n = source && map.get(source.node);
+              if (
+                !n ||
+                n.type !== "state" ||
+                source.key !== "value" ||
+                typeof n.props.value !== "string"
+              )
+                throw new AIWSError("EVENT", "Row sources require text state");
+            }
+        } else if (a.kind === "removeAt") {
+          if (
+            !Array.isArray(value) ||
+            (a.index !== "event" &&
+              (!Number.isSafeInteger(a.index) || a.index < 0)) ||
+            (a.index === "event" && event !== "remove")
+          )
+            throw new AIWSError("EVENT", "Invalid list removal");
         } else throw new AIWSError("EVENT", "Unknown action");
       }
     }
@@ -322,14 +389,70 @@ export function validateGraph(graph: Graph): true {
     throw new AIWSError("ORPHAN", "Unreachable nodes");
   return true;
 }
+/** Upgrade schema 1 without changing the supplied object or its transaction version. */
+export function migrateGraph(input: Graph): Graph {
+  if (!input || !Array.isArray(input.nodes) || input.nodes.length > 5000)
+    throw new AIWSError("GRAPH", "Invalid graph");
+  if (
+    input.schemaVersion !== undefined &&
+    ![1, 2].includes(input.schemaVersion)
+  )
+    throw new AIWSError("MIGRATION", "Unsupported graph schema");
+  const graph = clone(input);
+  if (graph.schemaVersion === 2) {
+    validateGraph(graph);
+    return graph;
+  }
+  if (!graph.nodes.every((n) => n && typeof n === "object" && n.props))
+    throw new AIWSError("GRAPH", "Invalid node");
+  const nodes = new Map(graph.nodes.map((n) => [n.id, n]));
+  const dataStates = new Set<string>();
+  const parse = (value: Value): Value => {
+    if (typeof value !== "string")
+      throw new AIWSError(
+        "MIGRATION",
+        "Schema 1 datasets must be JSON strings",
+      );
+    try {
+      return JSON.parse(value);
+    } catch {
+      throw new AIWSError("MIGRATION", "Invalid legacy dataset");
+    }
+  };
+  for (const node of graph.nodes) {
+    if (!node?.props) throw new AIWSError("GRAPH", "Invalid node");
+    for (const key of ["series", "rows", "entries"]) {
+      if (Object.hasOwn(node.props, key))
+        node.props[key] = parse(node.props[key]);
+      const source = node.bindings?.[key];
+      if (source) dataStates.add(source.node);
+    }
+  }
+  for (const id of dataStates) {
+    const state = nodes.get(id);
+    if (!state || state.type !== "state")
+      throw new AIWSError("MIGRATION", "Missing dataset state");
+    state.props.value = parse(state.props.value);
+  }
+  for (const node of graph.nodes)
+    for (const actions of Object.values(node.events || {}))
+      for (const action of actions || []) {
+        if (!dataStates.has(action.target)) continue;
+        if (action.kind === "set") action.value = parse(action.value);
+        if (action.kind === "cycle") action.values = action.values.map(parse);
+      }
+  graph.schemaVersion = 2;
+  validateGraph(graph);
+  return graph;
+}
 export function createKernel(initial: Graph) {
-  validateGraph(initial);
+  initial = migrateGraph(initial);
   let state = clone(initial),
     version = initial.version ?? 0;
   const history: Graph[] = [],
     future: Graph[] = [],
     listeners = new Set<(g: Graph, c: Change) => void>();
-  const get = (): Graph => clone({ ...state, schemaVersion: 1, version });
+  const get = (): Graph => clone({ ...state, schemaVersion: 2, version });
   const notify = (c: Change) => {
     for (const fn of listeners) {
       try {
@@ -449,7 +572,11 @@ export function createKernel(initial: Graph) {
     notify({ version, touched, [kind]: true });
     return true;
   }
-  function dispatch(id: string, event: "click" | "change", payload?: Scalar) {
+  function dispatch(
+    id: string,
+    event: "click" | "change" | "remove",
+    payload?: Scalar,
+  ) {
     const actions = state.nodes.find((n) => n.id === id)?.events?.[event];
     if (!actions) throw new AIWSError("EVENT", "No event handler");
     const values = new Map(state.nodes.map((n) => [n.id, clone(n.props)]));
@@ -457,7 +584,7 @@ export function createKernel(initial: Graph) {
     for (const a of actions) {
       const props = values.get(a.target)!;
       const old = props[a.key];
-      let value: Scalar;
+      let value: Value;
       switch (a.kind) {
         case "set":
           value = a.value;
@@ -469,13 +596,51 @@ export function createKernel(initial: Graph) {
           value = !old;
           break;
         case "cycle":
-          value = a.values[(a.values.indexOf(old) + 1) % a.values.length];
+          value = clone(
+            a.values[
+              (a.values.findIndex(
+                (v) => canonicalValue(v) === canonicalValue(old),
+              ) +
+                1) %
+                a.values.length
+            ],
+          );
           break;
         case "input":
           if (typeof payload !== "string")
             throw new AIWSError("EVENT", "Expected text input");
           value = payload;
           break;
+        case "append": {
+          if (!Array.isArray(old))
+            throw new AIWSError("EVENT", "Expected list");
+          const row = a.items.map((item) =>
+            isScalar(item)
+              ? item
+              : values.get(item.source.node)![item.source.key],
+          );
+          if (row.some((x) => typeof x === "string" && !x.trim()))
+            throw new AIWSError(
+              "REQUIRED",
+              "Complete all fields before adding a row",
+            );
+          value = [...clone(old), clone(row)];
+          break;
+        }
+        case "removeAt": {
+          const index = a.index === "event" ? payload : a.index;
+          if (
+            !Array.isArray(old) ||
+            !Number.isSafeInteger(index) ||
+            typeof index !== "number" ||
+            index < 0 ||
+            index >= old.length ||
+            (event === "remove" && index === 0)
+          )
+            throw new AIWSError("EVENT", "Invalid row index");
+          value = old.filter((_, i) => i !== index);
+          break;
+        }
       }
       props[a.key] = value;
       patch.push({ op: "set", id: a.target, key: a.key, value });
@@ -500,8 +665,7 @@ export function createKernel(initial: Graph) {
 export function deserialize(text: string): Graph {
   if (text.length > 2_000_000)
     throw new AIWSError("SIZE", "Graph exceeds 2 MB");
-  const graph: Graph = JSON.parse(text);
-  validateGraph(graph);
+  const graph: Graph = migrateGraph(JSON.parse(text));
   return graph;
 }
 export function contextSlice(graph: Graph, id: string) {

@@ -4,7 +4,6 @@ import {
   patchBytes,
   deserialize,
   resolveNode,
-  TYPES,
 } from "./kernel.mjs";
 import { seed } from "./graph.mjs";
 import { renderGraph } from "./runtime.mjs";
@@ -82,6 +81,16 @@ function render() {
     selected = graph.root;
     return render();
   }
+  const app = graph.nodes.find((n) => n.id === graph.root);
+  $("application-name").textContent = app.props.title || "Application";
+  $("application-badge").textContent = app.props.title || "LIVE DEMO";
+  $("example-select").value =
+    {
+      NORTHSTAR: "northstar",
+      "Counter lab": "counter",
+      "PEOPLE / CRM": "contacts",
+    }[app.props.title] || "";
+  $("example-picker").value = $("example-select").value;
   const metrics = renderGraph(
     graph,
     $("app-preview"),
@@ -111,6 +120,7 @@ function render() {
   desc.append(title, type);
   info.append(icon, desc);
   panel.append(info);
+  renderData(graph, node);
   const props = $("properties");
   props.replaceChildren();
   for (const [key, value] of Object.entries(node.props)) {
@@ -119,9 +129,13 @@ function render() {
     const label = document.createElement("label");
     label.textContent = key;
     const input = document.createElement(
-      ["series", "entries", "rows"].includes(key) ? "textarea" : "input",
+      typeof value === "object" ? "textarea" : "input",
     );
-    input.value = String(resolveNode(graph, node).props[key]);
+    const effective = resolveNode(graph, node).props[key];
+    input.value =
+      typeof effective === "object"
+        ? JSON.stringify(effective, null, 2)
+        : String(effective);
     input.id = `prop-${key}`;
     label.htmlFor = input.id;
     input.setAttribute("aria-label", key);
@@ -136,11 +150,13 @@ function render() {
     input.onchange = () => {
       try {
         const next =
-          typeof value === "number"
-            ? Number(input.value)
-            : typeof value === "boolean"
-              ? parseBoolean(input.value)
-              : input.value;
+          typeof value === "object"
+            ? JSON.parse(input.value)
+            : typeof value === "number"
+              ? Number(input.value)
+              : typeof value === "boolean"
+                ? parseBoolean(input.value)
+                : input.value;
         commit([{ op: "set", id: node.id, key, value: next }]);
       } catch (error) {
         notify(error.message, true);
@@ -178,9 +194,14 @@ function render() {
     source.value = node.bindings?.[bindingKey.value]?.node || "";
   };
   $("apply-binding").disabled = node.type === "state";
-  const event = node.type === "input" ? "change" : "click";
+  const event =
+    node.type === "input"
+      ? "change"
+      : node.type === "table"
+        ? "remove"
+        : "click";
   $("event-input").value = JSON.stringify(node.events?.[event] || [], null, 2);
-  $("apply-event").disabled = !["action", "input"].includes(node.type);
+  $("apply-event").disabled = !["action", "input", "table"].includes(node.type);
   $("binding-info").textContent = JSON.stringify(
     { bindings: node.bindings || {}, events: node.events || {} },
     null,
@@ -234,6 +255,104 @@ function render() {
   }
   if ([...parent.options].some((o) => o.value === old)) parent.value = old;
 }
+function dataset(graph, node) {
+  const key =
+    node.type === "table"
+      ? "rows"
+      : node.type === "chart"
+        ? "series"
+        : node.type === "activity"
+          ? "entries"
+          : node.type === "state"
+            ? "value"
+            : null;
+  if (!key) return null;
+  const source = node.bindings?.[key];
+  const owner = source ? graph.nodes.find((n) => n.id === source.node) : node;
+  const ownerKey = source?.key || key;
+  const value = owner.props[ownerKey];
+  return Array.isArray(value)
+    ? { owner, key: ownerKey, value, kind: node.type }
+    : null;
+}
+function renderData(graph, node) {
+  const data = dataset(graph, node),
+    grid = $("data-grid");
+  $("state-type-controls").hidden = node.type !== "state";
+  if (node.type === "state")
+    $("data-type").value =
+      node.props.value === null
+        ? "null"
+        : Array.isArray(node.props.value)
+          ? "array"
+          : typeof node.props.value;
+  grid.replaceChildren();
+  $("add-data-row").disabled = !data;
+  $("data-source").textContent = data
+    ? `${data.owner.id}.${data.key} · ${data.value.length} items · native array`
+    : "Select a table, chart, activity or list state to edit its dataset.";
+  if (!data) return;
+  const save = (value) => {
+    try {
+      commit([{ op: "set", id: data.owner.id, key: data.key, value }]);
+    } catch (error) {
+      notify(error.message, true);
+      render();
+    }
+  };
+  for (const [i, row] of data.value.entries()) {
+    const line = document.createElement("div");
+    line.className = "data-editor-row";
+    const cells = Array.isArray(row) ? row : [row];
+    if (cells.some((value) => value !== null && typeof value === "object")) {
+      line.textContent = `Item ${i + 1}: edit nested records in the property inspector`;
+      grid.append(line);
+      continue;
+    }
+    for (const [j, value] of cells.entries()) {
+      const input = document.createElement("input");
+      input.value = value === null ? "null" : String(value);
+      input.setAttribute("aria-label", `Data row ${i + 1} column ${j + 1}`);
+      input.onchange = () => {
+        try {
+          const next = structuredClone(data.value);
+          const parsed =
+            typeof value === "string" ? input.value : JSON.parse(input.value);
+          if (value === null ? parsed !== null : typeof parsed !== typeof value)
+            throw Error("Keep the cell type unchanged");
+          if (Array.isArray(row)) next[i][j] = parsed;
+          else next[i] = parsed;
+          save(next);
+        } catch (error) {
+          notify(error.message, true);
+          render();
+        }
+      };
+      line.append(input);
+    }
+    const remove = button("×", () =>
+      save(data.value.filter((_, index) => index !== i)),
+    );
+    remove.setAttribute("aria-label", `Delete data row ${i + 1}`);
+    remove.disabled = data.kind === "table" && i === 0;
+    line.append(remove);
+    grid.append(line);
+  }
+  $("add-data-row").onclick = () => {
+    const first = data.value[0];
+    const value =
+      data.kind === "chart"
+        ? 0
+        : Array.isArray(first)
+          ? first.map(() => "")
+          : data.kind === "activity"
+            ? ["", "", "", "", ""]
+            : data.kind === "table"
+              ? ["Column"]
+              : "";
+    save([...data.value, value]);
+  };
+}
 function parseBoolean(text) {
   if (text === "true") return true;
   if (text === "false") return false;
@@ -264,6 +383,36 @@ function download(content, type, name) {
   link.click();
   setTimeout(() => URL.revokeObjectURL(url), 1000);
 }
+$("apply-data-type").onclick = () => {
+  try {
+    const value = {
+      string: "",
+      number: 0,
+      boolean: false,
+      null: null,
+      array: [],
+      object: {},
+    }[$("data-type").value];
+    commit([{ op: "set", id: selected, key: "value", value }]);
+  } catch (error) {
+    notify(error.message, true);
+  }
+};
+const chooseExample = async (event) => {
+  const name = event.target.value;
+  if (!["northstar", "counter", "contacts"].includes(name)) return;
+  try {
+    const response = await fetch(`examples/${name}.json`);
+    if (!response.ok) throw Error("Example could not be loaded");
+    load(deserialize(await response.text()));
+    persist();
+    notify("Example loaded");
+  } catch (error) {
+    notify(error.message, true);
+  }
+};
+$("example-select").onchange = chooseExample;
+$("example-picker").onchange = chooseExample;
 $("send").onclick = () => {
   execute($("command").value);
   $("command").value = "";
@@ -343,13 +492,16 @@ $("add-node").onclick = () => {
         title: "New chart",
         period: "6 months",
         accent: "#7568f8",
-        series: "[20,35,30,55,60,78]",
+        series: [20, 35, 30, 55, 60, 78],
       },
       table: {
         title: "New table",
-        rows: '[["Name","Status"],["New workspace","Active"]]',
+        rows: [
+          ["Name", "Status"],
+          ["New workspace", "Active"],
+        ],
       },
-      activity: { title: "Recent activity", entries: "[]" },
+      activity: { title: "Recent activity", entries: [] },
       action: { text: "New action" },
       section: { title: "New section", layout: "stack" },
       state: { value: "" },
@@ -409,7 +561,12 @@ $("apply-event").onclick = () => {
       {
         op: "event",
         id: selected,
-        event: node.type === "input" ? "change" : "click",
+        event:
+          node.type === "input"
+            ? "change"
+            : node.type === "table"
+              ? "remove"
+              : "click",
         actions: JSON.parse($("event-input").value),
       },
     ]);
