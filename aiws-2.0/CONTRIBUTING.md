@@ -1,3 +1,5 @@
 # Contributing
 
-Use a feature branch; keep historical specifications intact. Run `npm ci`, `npm test`, and `npm run bench` inside `aiws-2.0`. Add regression tests for new graph operations and invalid input. Keep model services optional, preserve deterministic behavior, and document schema/version changes. Include measured evidence with performance claims. Submit focused pull requests with validation results.
+Use a feature branch and preserve historical specifications. Inside `aiws-2.0` run `npm ci`, `npm test`, `npm run test:e2e` and `npm run bench`. Browser tests need Chromium; install with `npx playwright-core install --with-deps chromium`, or set `CHROMIUM_PATH` to an existing executable. CI runs the same suites.
+
+Add regression tests for graph operations, invalid input and user-visible changes. Keep external models optional. Do not bypass schema validation or evaluate graph strings as code. Document schema/version changes and architectural tradeoffs. Include reproducible measurements with performance claims. Submit focused pull requests with test results and any known limitations.

@@ -1,7 +1,9 @@
 # Benchmark protocol
 
-Run `npm ci && npm run bench` in `aiws-2.0`. The benchmark warms the compiler on the seed, performs 1,000 one-node edits, and records transaction + compile median/p95, modified artifact count, context/graph UTF-8 bytes, current heap usage and Node version. It excludes browser layout, paint and inference; heap usage is not an allocation profile.
+Run `npm ci && npm run bench` in `aiws-2.0`. The benchmark warms the compiler, performs 1,000 one-node edits and records transaction + compile median/p95, changed artifact count, context/graph UTF-8 bytes, current heap usage and Node version. It excludes browser layout, paint and inference. Heap usage is a point-in-time process observation, not a retained allocation measurement.
 
-One onboarding run on Node 24.22.1 / 13 nodes measured median 0.096 ms, p95 0.378 ms and exactly 1,000 modified local artifacts for 1,000 patches. Context was 305 bytes versus 2,352 graph bytes. These are observations on this small sample, not cross-platform guarantees or superiority claims.
+One 0.2.0 development run on Node 24.22.1 with the 19-node dashboard measured median **0.237 ms**, p95 **0.622 ms**, and exactly **1,000 changed local artifacts for 1,000 patches**. Selected context was 333 bytes versus 3,662 graph bytes. These observations are specific to this small graph and machine. Cache warmup, host load and garbage collection affect results; no cross-platform guarantee or superiority claim is implied.
 
-Model calls are zero for deterministic commands. Token counts, inference costs and a traditional TypeScript/React baseline remain unmeasured (`null`). Future comparisons must fix model/version/tokenizer, tasks, output correctness, hardware and warmup, and report input/output tokens, costs, intent-to-preview latency and browser performance separately. No binary-token savings are claimed.
+Unchanged nodes avoid local template reconstruction and DOM replacement. Validation/address discovery still scans graph data, and state lookup is not yet fully indexed. Report this distinction alongside any timing result.
+
+Model calls are zero for deterministic commands. Actual input/output token counts, inference costs, intent-to-preview latency with a model, browser runtime comparisons, and a traditional TypeScript/React baseline remain unmeasured. A future comparison must fix the model/tokenizer, tasks, correctness criteria, hardware and warmup, and report those dimensions separately. Byte counts are not token counts. No binary-token savings are claimed.

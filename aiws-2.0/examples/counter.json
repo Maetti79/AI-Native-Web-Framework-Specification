@@ -1,0 +1,96 @@
+{
+  "schemaVersion": 1,
+  "root": "app",
+  "nodes": [
+    {
+      "id": "app",
+      "type": "app",
+      "props": {
+        "title": "Counter lab",
+        "subtitle": "State, binding, action — one graph"
+      },
+      "children": ["count", "visible", "controls", "display"]
+    },
+    {
+      "id": "count",
+      "type": "state",
+      "props": {
+        "value": 0
+      },
+      "children": []
+    },
+    {
+      "id": "visible",
+      "type": "state",
+      "props": {
+        "value": true
+      },
+      "children": []
+    },
+    {
+      "id": "controls",
+      "type": "section",
+      "props": {
+        "title": "Try it",
+        "layout": "stack"
+      },
+      "children": ["increase", "toggle"]
+    },
+    {
+      "id": "increase",
+      "type": "action",
+      "props": {
+        "text": "Add one"
+      },
+      "events": {
+        "click": [
+          {
+            "kind": "increment",
+            "target": "count",
+            "key": "value",
+            "amount": 1
+          }
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "toggle",
+      "type": "action",
+      "props": {
+        "text": "Show / hide counter"
+      },
+      "events": {
+        "click": [
+          {
+            "kind": "toggle",
+            "target": "visible",
+            "key": "value"
+          }
+        ]
+      },
+      "children": []
+    },
+    {
+      "id": "display",
+      "type": "metric",
+      "props": {
+        "label": "Count",
+        "value": 0,
+        "delta": "Local state",
+        "tone": "violet"
+      },
+      "bindings": {
+        "value": {
+          "node": "count",
+          "key": "value"
+        },
+        "visible": {
+          "node": "visible",
+          "key": "value"
+        }
+      },
+      "children": []
+    }
+  ]
+}
